@@ -6,10 +6,12 @@
   "author": "Jasdeep Madan <jasdeepm@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "serverless-dotenv-plugin": "^3.0.0",
     "serverless-offline": "^6.7.0"
   },
   "dependencies": {
-    "pg": "^8.3.3",
+    "aws-sdk": "^2.750.0",
+    "axios": "^0.20.0",
     "uuid": "^8.3.0"
   }
 }
