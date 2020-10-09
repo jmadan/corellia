@@ -12,6 +12,7 @@
   "dependencies": {
     "aws-sdk": "^2.750.0",
     "axios": "^0.20.0",
+    "rollbar": "^2.19.3",
     "uuid": "^8.3.0"
   }
 }
