@@ -1,8 +1,8 @@
 const axios = require("axios");
 
-const getLatestPrices = async (event, marketStackApiKey) => {
-  let ticker = JSON.parse(event);
-  console.log(ticker);
+const getLatestPrices = async (ticker, marketStackApiKey) => {
+  // let ticker = JSON.parse(event);
+  // console.log(ticker);
   let symbol = "";
   if (ticker.exchange === "NSX" || ticker.exchange === "NASDAQ") {
     symbol = ticker.symbol;

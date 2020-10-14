@@ -35,18 +35,22 @@ module.exports.index = async (event) => {
       "MARKETSTACK_API_KEY"
     );
     const { access_token, expires_in, token_type } = token;
-    const { body } = Records[0];
 
-    const eodPrice = await service.getLatestPrices(body, marketStackApiKey)
-    let latestEoDPrice = eodPrice.data
-    if (latestEoDPrice.close !== 0) {
-      await service.updatePrices(latestEoDPrice, token);
-      console.log(`daily prices for symbol ${latestEoDPrice.symbol} updated successfully on ${Date.now()}`)
-      return successResponse(
-        201,
-        `daily prices for symbol ${latestEoDPrice.symbol} updated successfully on ${Date.now()}`
-      );
-    }      
+    const result = await Records.map(async (record) => {
+      let { body } = record;
+      if(typeof body === "string"){
+        body = JSON.parse(body)
+      }
+      const eodPrice = await service.getLatestPrices(body, marketStackApiKey)
+      let latestEoDPrice = eodPrice.data;
+      if (latestEoDPrice.close !== 0) {
+        return service.updatePrices(latestEoDPrice, token);
+      }
+    })
+
+    return Promise.all(result).then(values =>{
+      return successResponse(201, `Latest EOD prices updated for ${values.length} tickers`)
+    })
   } catch (err) {
     rollbar.log('eodOfPrices',err)
     return errorResponse(500, err);
