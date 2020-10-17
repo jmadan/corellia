@@ -1,4 +1,4 @@
-service: endofdayprice
+service: end-of-day-price
 
 provider:
   name: aws
