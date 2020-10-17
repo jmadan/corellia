@@ -1,7 +1,6 @@
 "use strict";
 const awsObject = require("./aws");
 const service = require("./tickerService");
-const tokenService = require("./tokenService");
 const Rollbar = require("rollbar");
 
 var rollbar = new Rollbar({
@@ -11,30 +10,26 @@ var rollbar = new Rollbar({
 });
 
 
-const errorResponse = (statusCode, message) => ({
-  statusCode: statusCode || 501,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify(message) || "Internal Server Error",
-});
-
-const successResponse = (statusCode = 200, message) => ({
-  statusCode: statusCode,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify(message),
+const functionResponse = (statusCode, message) => ({
+  statusCode,
+  body: JSON.stringify(
+    {
+      message,
+    },
+    null,
+    2
+  ),
 });
 
 module.exports.index = async (event) => {
   try {
     const { Records } = event;
-    const token = await tokenService.getToken();
     const marketStackApiKey = await awsObject.getParameter(
       "MARKETSTACK_API_KEY"
     );
-    const { access_token, expires_in, token_type } = token;
+    const token = await awsObject.getParameter(
+      "auth0Token"
+    );
 
     const result = await Records.map(async (record) => {
       let { body } = record;
@@ -49,10 +44,10 @@ module.exports.index = async (event) => {
     })
 
     return Promise.all(result).then(values =>{
-      return successResponse(201, `Latest EOD prices updated for ${values.length} tickers`)
+      return functionResponse(201, `Latest EOD prices updated for ${values.length} tickers`)
     })
   } catch (err) {
     rollbar.log('eodOfPrices',err)
-    return errorResponse(500, err);
+    return functionResponse(500, err);
   }
 };
